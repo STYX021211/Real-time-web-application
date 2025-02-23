@@ -1,5 +1,5 @@
 # Real-time-web-application
-The web app allows  users to communicate in real-time, exchange files, personalize their chat environment, and enjoy  gameplay all within a single platform. 
+The chat and game web app allows  users to communicate in real-time, exchange files, personalize their chat environment, and enjoy  gameplay all within a single platform. 
 
 1.Real-time chat
 
