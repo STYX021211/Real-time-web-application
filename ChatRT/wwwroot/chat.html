@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+    <title>Chat room</title>
+    <link href="image/favicon.png" rel="shortcut icon">
+    <link href="css/app.css" rel="stylesheet">
+    <style>
+        main {
+            overflow-y: scroll;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+        
+        .active {
+            outline: 5px dashed red;
+            outline-offset: -5px;
+        }
+        
+        .image {
+            max-width: 200px;
+            max-height: 200px;
+            border: 1px solid #999;
+            cursor: pointer;
+        }
+        
+        .image:fullscreen {
+            object-fit: scale-down !important;
+            border: none !important;
+            background: #000 !important;
+        }
+        
+        #dialog, #fileDialog {
+            border: 1px solid #000;
+            border-radius: 5px;
+            padding: 5px;
+            position: relative;
+        }
+        
+        #dialog::backdrop, #fileDialog::backdrop {
+            background: #0009;
+        }
+
+        #dialog form {
+            margin-bottom: 5px;
+        }
+
+        #fileDialog form {
+            margin-bottom: 5px;
+        }
+
+        /* TODO: CSS */
+        #container, #fileContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        #container .image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover !important;
+        }
+
+        #btn {
+            anchor-name: --btn;
+        }
+
+        #pop {
+            border: 1px solid #000;
+            border-radius: 5px;
+            padding: 5px;
+
+            inset: unset;
+            top: anchor(--btn top);
+            right: anchor(--btn left);
+            translate: -10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 15px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            flex-grow: 1;
+        }
+
+        #sendButton {
+            margin-left: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007fff;
+            color: white;
+            cursor: pointer;
+        }
+
+        #sendButton:hover {
+            background-color: #0056b3;
+        }
+
+        .left-align {
+            text-align: left;
+        }
+
+        .notification {
+            font-style: italic;
+            margin-top: 5px;
+            color: gray;
+            font-size: 12px;
+        }
+
+        .deleted-notification {
+            color: gray; /* Gray color for deleted message notification */
+            font-style: italic;
+        }
+
+        body.default {
+            background-color: #f0f0f0;
+            color: #000;
+        }
+
+        body.dark {
+            background-color: #333;
+            color: #fff;
+        }
+
+        body.light {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .settings-button {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+        }
+
+        .settings-button-img, #avatar {
+            width: 38px;
+            height: 38px;
+        }
+
+        #icon {
+            width: 20px;
+            height: 20px;
+        }
+
+
+        #emojiPopover {
+            display: none;
+            position: absolute;
+            right: 10px;
+            bottom: 60px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        #emojiPopover button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            margin: 5px;
+        }
+
+        #formattingToolbar {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        #formattingToolbar button {
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .timestamp {
+            display: block;
+            text-align: right;
+            font-size: 10px;
+            color: gray;
+            margin-top: 5px;
+        }
+
+        #capturedPhoto, #video {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid #000; /* Optional: Add a border to the image */
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        #left {
+            left: 10px;
+        }
+
+        #right {
+            right: 10px;
+        }
+
+        .file-item {
+            margin: 5px 0;
+        }
+
+        #username {
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Chat room</h1>
+        <!-- TODO: Popover -->
+        <button id="btn" popovertarget="pop">👧🏻 = <b id="count">0</b></button>
+        <div id="pop" popover>TODO</div>
+        <div id="userProfile">
+            <img id="avatar" alt="Avatar">
+            <p id="icon"></p>
+            <span id="username"></span>
+        </div>
+        <button id="settingsButton" class="settings-button">
+            <img src="image/settingButton.jpg" alt="Settings" class="settings-button-img">
+        </button>
+    </header>
+
+    <main>
+        <div style="flex: 1"></div>
+        <ul id="chat"></ul>    
+    </main>
+    
+    <video id="video" autoplay style="display:none;"></video>
+    <img id="capturedPhoto" style="display:none;">
+    
+    <footer>
+        <form autocomplete="off">
+            <div id="formattingToolbar" style="display: none;">
+                <button id="boldButton"><b>B</b></button>
+                <button id="italicButton"><i>I</i></button>
+                <button id="underlineButton"><u>U</u></button>
+                <button id="monospaceButton"><code>M</code></button>
+            </div>
+            <textarea id="messageInput" placeholder="Enter Message" autofocus></textarea>
+            <button type="button" id="emojiButton">😀</button> <!-- Emoji Button --> 
+            <button type="submit" id="sendButton">Send</button>  
+            <button type="button" id="capturePhotoButton">📷</button>
+            <button type="button" id="image">Image</button>
+            <button type="button" id="gallery">Gallery</button>
+            <button type="button" id="fileList">File list</button>
+            <button type="button" id="file">File</button>
+            <button type="button" id="leave">Leave</button>
+            <input type="file" id="file1" accept="image/*" hidden multiple>
+            <input type="file" id="file2" accept=".pdf,.docx,.doc,.txt,.ppt" hidden multiple>
+        </form>
+    </footer>
+
+    <div id="emojiPopover"></div> <!-- Emoji Popover -->
+
+    <dialog id="dialog">
+        <form method="dialog"><button>X</button></form>
+        <div id="container"></div>
+    </dialog>
+
+    <dialog id="fileDialog">
+        <form method="dialog"><button>X</button></form>
+        <div id="fileContainer"></div>
+    </dialog>
+    
+
+    <audio id="messageSentSound" src="sounds/message-sent.mp3" preload="auto"></audio>
+    <audio id="messageReceivedSound" src="sounds/message-received.mp3" preload="auto"></audio>
+
+    <dialog id="settingsModal">
+        <form method="dialog">
+            <label for="settingsOptions">Settings Options:</label>
+            <select id="settingsOptions">
+                <option>-Select one-</option>
+                <option value="colorTheme">Color Theme</option>
+                <option value="backgroundImage">Background Image</option>
+            </select>
+            <div id="settingsContent">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <button type="submit">Save</button>
+            <button type="button" id="closeSettings">Close</button>
+        </form>
+    </dialog>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.slim.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Checking =============================
+        const avatar = sessionStorage.getItem('avatar');
+        const icon = sessionStorage.getItem('icon');
+        const name = sessionStorage.getItem('name');
+
+        if (!name) {
+            location = '/';
+            throw 'ERROR: Invalid name';
+        }
+
+        // Set the avatar or icon image
+        if (avatar) {
+            $('#avatar').attr('src', avatar);
+        } else if (icon) {
+            $('#icon').text(`${icon}`);
+            $('#avatar').attr('src', '').hide();
+        } else {
+            console.log("No avatar or icon found.");
+        }
+
+        // Set the username
+        $('#username').text(name);
+
+        // Function to remove the username from local storage
+        function removeUsername(name) {
+            let existingUsernames = JSON.parse(localStorage.getItem('usernames')) || [];
+            existingUsernames = existingUsernames.filter(username => username !== name);
+            localStorage.setItem('usernames', JSON.stringify(existingUsernames));
+            console.log("Username removed:", name);
+        }
+
+        // General Events =======================
+        $('#leave').click(e => {
+            if (name) {
+                removeUsername(name);
+            }
+            sessionStorage.clear();
+            location = '/';
+        });
+
+        // General Functions ====================
+        function getImageURL(message) {
+            const re = /\.(jpg|jpeg|png|webp|bmp|gif)$/i;
+            try {
+                const url = new URL(message);
+                if (re.test(url.pathname)) {
+                    return url.href;
+                }
+            }
+            catch {
+                // Do nothing
+            }
+            return null;
+        }
+
+        function getYouTubeId(message) {
+            try {
+                const url = new URL(message);
+                if (url.hostname == 'www.youtube.com' &&
+                    url.pathname == '/watch') {
+                    return url.searchParams.get('v');
+                }
+            }
+            catch {
+                // Do nothing
+            }
+            return null;
+        }
+
+        function generateMessageId() {
+            return 'msg-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function sendImages(files) {
+            for (const f of files) {
+                if (f && f.type.startsWith('image/')) { //file checking
+
+                    fit(f, 500, 500, 'dataURL', 'image/webp') //resize image
+                        // .then(url => con.invoke('SendImage', name, url));
+                        .then(url => {
+                            // const messageId = generateMessageId(); // Generate messageId
+                            con.invoke('SendImage', name, url)
+                                .then(() => {
+                                    // Hide the captured photo after sending
+                                    capturedPhoto.style.display = 'none';
+                                })
+                                .catch(err => {
+                                    console.error("Error sending image: ", err);
+                                });
+                        });
+                }
+            }
+            
+        }
+    
+            function sendFiles(files) {
+                const maxFileSize = 100 * 1024 * 1024; // 100MB in bytes
+
+                for (const f of files) {
+                    // if file type ends with pdf, docx, txt, ppt
+                    if (f && (f.type.endsWith('/pdf') || f.type.endsWith('/docx') || f.type.endsWith('/doc') || f.type.endsWith('/txt') || f.type.endsWith('/ppt'))) {
+                        // Check file size
+                        if (f.size > maxFileSize) {
+                            console.error(`File ${f.name} is too large. Maximum allowed size is 100MB.`);
+                            continue;
+                        }
+
+                        const fr = new FileReader();
+                        fr.onload = e => {
+                            const url = e.target.result;
+                            con.invoke('SendFile', name, url, f.name);
+                        };
+                        fr.readAsDataURL(f);
+                    } else {
+                        console.error(`File type of ${f.name} is not allowed.`);
+                    }
+                }
+            }
+
+        // Function to dynamically update settings content based on selected option
+        function updateSettingsContent(option) {
+            const settingsContent = document.getElementById('settingsContent');
+            settingsContent.innerHTML = ''; // Clear previous content
+
+            switch (option) {
+                case 'colorTheme':
+                    settingsContent.innerHTML = `
+                        <label for="colorThemeSelect">Select Color Theme:</label>
+                        <select id="colorThemeSelect">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    `;
+                     // Add event listener to apply color theme immediately
+                    document.getElementById('colorThemeSelect').addEventListener('change', function () {
+                        const theme = this.value;
+                        applyColorTheme(theme);
+                        localStorage.setItem('colorTheme', theme); // Store preference
+                    });
+                    break;
+                case 'backgroundImage':
+                    settingsContent.innerHTML = `
+                        <label for="backgroundImageInput">Select Background Image:</label>
+                        <input type="file" id="backgroundImageInput" accept="image/*">
+                    `;
+                    // Add event listener to apply background image immediately
+                    document.getElementById('backgroundImageInput').addEventListener('change', function () {
+                        const imageFile = this.files[0];
+                        if (imageFile) {
+                            applyBackgroundImage(imageFile);
+                            localStorage.setItem('backgroundImage', imageFile.name); // Store preference
+                        }
+                    });
+                    break;
+            }
+        }
+
+        // Event listeners for hover on settings options
+        document.getElementById('settingsOptions').addEventListener('change', function (e) {
+            const option = e.target.value;
+            updateSettingsContent(option);
+        });
+
+        // Apply the selected color theme
+        function applyColorTheme(theme) {
+            // Clear the background image
+            document.body.style.backgroundImage = '';
+
+            switch (theme) {
+                case 'light':
+                    document.body.classList.add('light');
+                    document.body.classList.remove('dark');
+                    break;
+                case 'dark':
+                    document.body.classList.add('dark');
+                    document.body.classList.remove('light');
+                    break;
+                default:
+                    document.body.classList.add('light'); // Default to light theme
+                    document.body.classList.remove('dark');
+                    break;
+            }
+
+            // Update the settings modal background color immediately
+            setSettingsModalBackground();
+        }
+
+        // Apply the selected background image
+        function applyBackgroundImage(file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.body.style.backgroundImage = `url(${e.target.result})`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Event listener for saving settings
+        document.querySelector('#settingsModal form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const option = document.getElementById('settingsOptions').value;
+
+            switch (option) {
+                case 'colorTheme':
+                    const theme = document.getElementById('colorThemeSelect').value;
+                    applyColorTheme(theme);
+                    localStorage.setItem('colorTheme', theme); // Store preference
+                    break;
+                case 'backgroundImage':
+                    const imageFile = document.getElementById('backgroundImageInput').files[0];
+                    if (imageFile) {
+                        applyBackgroundImage(imageFile);
+                        localStorage.setItem('backgroundImage', imageFile.name); // Store preference
+                    }
+                    break;
+            }
+
+            document.getElementById('settingsModal').close();
+        });
+
+        // Load stored preferences on page load
+        window.addEventListener('load', function () {
+            const storedTheme = localStorage.getItem('colorTheme');
+            if (storedTheme) {
+                applyColorTheme(storedTheme);
+            } else {
+                applyColorTheme('light'); // Default to light theme if no preference is stored
+            }
+
+            const storedBackgroundImage = localStorage.getItem('backgroundImage');
+            if (storedBackgroundImage) {
+                // Load the stored background image (requires additional logic to handle file loading)
+            }
+        });
+
+        // Function to set the background color of the settings modal based on the current theme
+        function setSettingsModalBackground() {
+            const settingsModal = document.getElementById('settingsModal');
+            if (document.body.classList.contains('dark')) {
+                settingsModal.style.backgroundColor = '#333';
+                settingsModal.style.color = '#fff';
+            } else {
+                settingsModal.style.backgroundColor = '#fff';
+                settingsModal.style.color = '#000';
+            }
+        }
+
+        // Open and close settings modal
+        document.getElementById('settingsButton').addEventListener('click', function () {
+            setSettingsModalBackground(); // Set the background color before showing the modal
+            document.getElementById('settingsModal').showModal();
+        });
+
+        document.getElementById('closeSettings').addEventListener('click', function () {
+            document.getElementById('settingsModal').close();
+        });
+
+        // Function to play sound
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.muted = false; // Ensure the sound is not muted
+                sound.volume = 1.0;  // Set the volume to maximum
+                sound.play().catch(error => {
+                    console.error('Error playing sound:', error);
+                });
+            }
+        }
+
+        // Load emojis from JSON file
+        let emojis = {};
+        fetch('emojis.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                emojis = data;
+                populateEmojiPopover();
+            })
+            .catch(error => {
+                console.error('Error loading emojis:', error);
+            });
+
+        // Populate the emoji popover
+        function populateEmojiPopover() {
+            const emojiPopover = document.getElementById('emojiPopover');
+            emojiPopover.innerHTML = ''; // Clear previous content
+            for (const [text, emoji] of Object.entries(emojis)) {
+                const button = document.createElement('button');
+                button.innerHTML = emoji;
+                button.onclick = () => {
+                    const messageInput = document.getElementById('messageInput');
+                    messageInput.value += ` ${emoji}`;
+                    emojiPopover.style.display = 'none';
+                };
+                emojiPopover.appendChild(button);
+            }
+        }
+
+        // Toggle emoji popover visibility
+        document.getElementById('emojiButton').addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent the click from propagating to the document
+            const emojiPopover = document.getElementById('emojiPopover');
+            emojiPopover.style.display = emojiPopover.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Close emoji popover when clicking outside
+        document.addEventListener('click', (event) => {
+            const emojiPopover = document.getElementById('emojiPopover');
+            if (!emojiPopover.contains(event.target) && event.target.id !== 'emojiButton') {
+                emojiPopover.style.display = 'none';
+            }
+        });
+
+        // Function to replace text with emojis
+        function replaceTextWithEmojis(text) {
+            for (const [key, value] of Object.entries(emojis)) {
+                text = text.replaceAll(key, value);
+            }
+            return text;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('messageInput');
+            const formattingToolbar = document.getElementById('formattingToolbar');
+            let selectedText = '';
+
+            // Function to wrap selected text with given markdown syntax
+            function wrapSelectedText(startTag, endTag) {
+                const start = messageInput.selectionStart;
+                const end = messageInput.selectionEnd;
+                const text = messageInput.value;
+                const before = text.substring(0, start);
+                const selected = text.substring(start, end);
+                const after = text.substring(end);
+                messageInput.value = before + startTag + selected + endTag + after;
+            }
+
+            // Event listeners for formatting buttons
+            document.getElementById('boldButton').addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent form submission
+                wrapSelectedText('**', '**');
+            });
+
+            document.getElementById('italicButton').addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent form submission
+                wrapSelectedText('*', '*');
+            });
+
+            document.getElementById('underlineButton').addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent form submission
+                wrapSelectedText('__', '__');
+            });
+
+            document.getElementById('monospaceButton').addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent form submission
+                wrapSelectedText('`', '`');
+            });
+
+             // Show formatting toolbar when text is selected
+            messageInput.addEventListener('mouseup', function() {
+                const start = messageInput.selectionStart;
+                const end = messageInput.selectionEnd;
+                selectedText = messageInput.value.substring(start, end);
+                if (selectedText) {
+                    formattingToolbar.style.display = 'flex';
+                } else {
+                    formattingToolbar.style.display = 'none';
+                }
+            });
+
+            // Hide formatting toolbar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!formattingToolbar.contains(event.target) && event.target !== messageInput) {
+                    formattingToolbar.style.display = 'none';
+                }
+            });
+
+            // Prevent "Enter" key from sending the message and insert a newline instead
+            messageInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent form submission
+                    const start = messageInput.selectionStart;
+                    const end = messageInput.selectionEnd;
+                    const text = messageInput.value;
+                    const before = text.substring(0, start);
+                    const after = text.substring(end);
+                    messageInput.value = before + '\n' + after;
+                    messageInput.selectionStart = messageInput.selectionEnd = start + 1;
+
+                    // Adjust scroll position to ensure the new line is visible
+                    messageInput.scrollTop = messageInput.scrollHeight;
+                }
+            });
+        });
+
+        // Function to apply text formatting
+        function applyTextFormatting(text) {
+            // Bold
+            text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            // Italic
+            text = text.replace(/\*(.*?)\*/g, '<i>$1</i>');
+            // Underline
+            text = text.replace(/__(.*?)__/g, '<u>$1</u>');
+            // Monospace
+            text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+            return text;
+        }
+
+        let rudeWords = [];
+        fetch('rudeWords.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            rudeWords = data;
+        })
+        .catch(error => {
+            console.error('Error loading rude words:', error);
+        });
+
+        function replaceRudeWords(text) {
+            for (const word of rudeWords) {
+                text = text.replace(word, '&#42;&#42;&#42;');
+            }
+            return text;
+        }
+
+        function sendMessage() {
+            console.log('sendMessage called');
+
+            let message = $('#messageInput').val().trim();
+            console.log('Message input:', message);
+            if (message === '') {
+                console.log('Message is empty, returning');
+                return;
+            }
+
+            // Replace rude words
+            message = replaceRudeWords(message);
+            console.log('Message after replacing rude words:', message);
+
+            message = replaceTextWithEmojis(message);
+            console.log('Message after replacing text with emojis:', message);
+            message = applyTextFormatting(message);
+            console.log('Message after applying text formatting:', message);
+
+            if (editingMessageId) {
+                console.log('Editing message with ID:', editingMessageId);
+                con.invoke('EditMessage', editingMessageId, message);
+                editingMessageId = null;
+            } else {
+                console.log('Sending message:', message);
+                con.invoke('SendText', name, message);
+                playSound('messageSentSound'); // Play sound on message sent
+
+                const url = getImageURL(message);
+                const id = getYouTubeId(message);
+
+                if (url) {
+                    console.log('Sending image with URL:', url);
+                    con.invoke('SendImage', name, url, messageId);
+                    playSound('messageSentSound'); // Play sound on message sent
+                } else if (id) {
+                    console.log('Sending YouTube video with ID:', id);
+                    con.invoke('SendYouTube', name, id, messageId);
+                    playSound('messageSentSound'); // Play sound on message sent
+                } else {
+                    console.log('Sending text message:', message);
+                    con.invoke('SendText', name, message, messageId);
+                    playSound('messageSentSound'); // Play sound on message sent
+                }
+            } 
+            $('#messageInput').val('');
+
+        }
+
+        $(document).ready(function() {
+            // Bind sendMessage to the send button click event
+            $('#sendButton').on('click', function() {
+                console.log('Send button clicked');  // Debugging
+                sendMessage();
+            });
+
+            // Bind sendMessage to the Enter key press event
+            $('#messageInput').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    console.log('Enter key pressed');  // Debugging
+                    sendMessage();
+                }
+            });
+        });
+
+        function updateTimestamps() {
+            const now = new Date();
+            document.querySelectorAll('.timestamp').forEach(span => {
+                const messageTime = new Date(span.getAttribute('data-time'));
+                const diff = Math.floor((now - messageTime) / 1000); // difference in seconds
+
+                let relativeTime;
+                if (diff < 60) {
+                    relativeTime = `${diff} seconds ago`;
+                } else if (diff < 3600) {
+                    relativeTime = `${Math.floor(diff / 60)} minutes ago`;
+                } else if (diff < 86400) {
+                    relativeTime = `${Math.floor(diff / 3600)} hours ago`;
+                } else {
+                    relativeTime = `${Math.floor(diff / 86400)} days ago`;
+                }
+
+                span.textContent = relativeTime;
+            });
+        }
+
+        // Call updateTimestamps every minute
+        setInterval(updateTimestamps, 60000);       
+        
+        // Connection Setup =====================
+        const param = $.param({ name });
+        
+        const con = new signalR.HubConnectionBuilder()
+            .withUrl('/hub?' + param)
+            .build();
+
+        con.onclose(err => {
+            sessionStorage.clear();
+            location = '/';
+        });
+
+        con.on('ReceiveText', (name, message, who, messageId) => {
+            message = replaceRudeWords(message);
+
+            // Text to emoji
+            message = replaceTextWithEmojis(message);
+
+            // Apply text formatting
+            message = applyTextFormatting(message);
+
+            // Preserve line breaks
+            message = message.replace(/\n/g, '<br>');
+
+            // Text to hyperlink
+            message = message.replace(
+                /(https?:\/\/\S+)/gi,
+                '<a href="$&" target="_blank">$&</a>'
+            );
+
+            // Email to hyperlink
+            message = message.replace(
+                /([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi,
+                '<a href="mailto:$&">$&</a>'
+            );
+
+            // Phone to WhatsApp link
+            message = message.replace(
+                 /(\+?\d{1,4}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9})/g,
+                    '<a href="https://wa.me/$1" target="_blank">$1</a>'
+            );
+
+            // appendMessage(name, message, who, messageId);
+
+            const isSender = name === sessionStorage.getItem('name');
+            const editDeleteButtons = isSender ? `
+                <button class="edit">Edit</button>
+                <button class="delete">Delete</button>
+            ` : '';
+
+            const $messageElement = $(`
+                <li class="${who}" data-id="${messageId}">
+                    <div class="left-align">
+                        <b>${name}:</b><br> ${message}
+                        ${editDeleteButtons}
+                        <span class="timestamp" data-time="${new Date().toISOString()}">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </li>
+            `);
+
+            $('#chat').append($messageElement);
+
+            // Play sound on message received
+            if (!isSender) {
+                playSound('messageReceivedSound');
+            }
+
+            // Play sound on message sent
+            if (isSender) {
+                playSound('messageSentSound');
+            }
+
+            // Hide edit and delete buttons after 1 minute
+            if (isSender) {
+                setTimeout(() => {
+                    $messageElement.find('.edit, .delete').hide();
+                }, 60000); // 60000 milliseconds = 1 minute
+            }
+
+            updateTimestamps(); // Update timestamps immediately after adding a new message
+        });
+
+        con.on('ReceiveImage', (name, url, who, messageId) => {
+            const isSender = name === sessionStorage.getItem('name');
+            const editDeleteButtons = isSender ? `
+                <button class="delete">Delete</button>
+            ` : '';
+            
+            const $messageElement = $(`
+                <li class="${who}" data-id="${messageId}">
+                    <div class="left-align">
+                        <b>${name}</b> sent an image<br>
+                        <img src="${url}" class="image">
+                        ${editDeleteButtons}
+                        <span class="timestamp" data-time="${new Date().toISOString()}">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </li>
+            `);
+            $('#chat').append($messageElement);
+
+            // Play sound on message received
+            if (!isSender) {
+                playSound('messageReceivedSound');
+            }
+
+            // Play sound on message sent
+            if (isSender) {
+                playSound('messageSentSound');
+            }
+
+            // Hide edit and delete buttons after 1 minute
+            if (isSender) {
+                setTimeout(() => {
+                    $messageElement.find('.edit, .delete').hide();
+                }, 60000); // 60000 milliseconds = 1 minute
+            }
+
+            updateTimestamps(); // Update timestamps immediately after adding a new message
+            
+        });
+
+        con.on('ReceiveYouTube', (name, id, who, messageId) => {
+            const isSender = name === sessionStorage.getItem('name');
+            const editDeleteButtons = isSender ? `
+                <button class="delete">Delete</button>
+            ` : '';
+
+            const $messageElement = $(`
+                <li class="${who}" data-id="${messageId}">
+                    <div class="left-align">
+                        <b>${name}</b> sent a video<br>
+                        <iframe width="400" height="300" 
+                                src="https://www.youtube.com/embed/${id}"
+                                frameborder="0"
+                                allowfullscreen></iframe>
+                        ${editDeleteButtons}
+                        <span class="timestamp" data-time="${new Date().toISOString()}">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </li>
+            `);
+            $('#chat').append($messageElement);
+
+            // Play sound on message received
+            if (!isSender) {
+                playSound('messageReceivedSound');
+            }
+
+            // Play sound on message sent
+            if (isSender) {
+                playSound('messageSentSound');
+            }
+
+            // Hide edit and delete buttons after 1 minute
+            if (isSender) {
+                setTimeout(() => {
+                    $messageElement.find('.edit, .delete').hide();
+                }, 60000); // 60000 milliseconds = 1 minute
+            }
+
+            updateTimestamps(); // Update timestamps immediately after adding a new message
+        });
+
+        con.on('ReceiveFile', (name, url, filename, who, messageId) => {
+            const isSender = name === sessionStorage.getItem('name');
+            const editDeleteButtons = isSender ? `
+                <button class="delete">Delete</button>
+            ` : '';
+
+            // const fileDisplayWithIcon = displayFileWithIcon(filename);
+
+           const $messageElement = $(`
+                <li class="${who}" data-id="${messageId}">
+                    <div class="left-align">
+                        <b>${name}</b> sent a file<br>
+                        <a href="${url}" download="${filename}" class="file-item">${filename}</a>
+                        ${editDeleteButtons}
+                        <span class="timestamp" data-time="${new Date().toISOString()}">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </li>
+            `);
+            $('#chat').append($messageElement);
+
+            // Play sound on message received
+            if (!isSender) {
+                playSound('messageReceivedSound');
+            }
+
+            // Play sound on message sent
+            if (isSender) {
+                playSound('messageSentSound');
+            }
+
+            // Hide edit and delete buttons after 1 minute
+            if (isSender) {
+                setTimeout(() => {
+                    $messageElement.find('.edit, .delete').hide();
+                }, 60000); // 60000 milliseconds = 1 minute
+            }
+
+            updateTimestamps(); // Update timestamps immediately after adding a new message
+        });
+
+            
+        // Handle the deletion event from the server
+        con.on('MessageDeleted', (messageId, name) => {
+            const $li = $(`#chat li[data-id="${messageId}"]`);
+            if ($li.length) {
+                $li.find('.left-align').html(`<div class="deleted-notification">${name} deleted the message.</div>`);
+                $li.find('.timestamp').attr('data-time', new Date().toISOString()); // Update timestamp
+            }
+            updateTimestamps(); // Update timestamps after deleting a message
+        });
+
+        con.on('UpdateStatus', (count, status, names) => {
+            $('#count').text(count);
+
+            $('#chat').append(`
+                <li class="status">
+                    <div>
+                        ${status}
+                    </div>
+                </li>
+            `);
+
+            $('#pop').html(names.toSorted().join('<br>'));
+
+            //if count == 0, clear the localStorage in the browser
+            if (count == 0) {
+                sessionStorage.clear();
+            }
+        });
+
+        con.on('MessageEdited', (messageId, newMessage, name) => {
+            const $li = $(`#chat li[data-id="${messageId}"]`);
+            if ($li.length) {
+                newMessage = $('<div>').text(newMessage).html().replace(/\n/g, '<br>');
+                $li.find('.left-align').html($li.find('.left-align').html().split('<br>')[0] + '<br>' + newMessage + '<br>');
+                $li.find('.notification').remove(); // Remove any existing notification
+                $li.find('.left-align').append(`<div class="notification">Edited.</div>`); // Add new notification
+                $li.find('.timestamp').attr('data-time', new Date().toISOString()); // Update timestamp
+            }
+            updateTimestamps(); // Update timestamps after editing a message
+        });
+
+        // Start ================================
+        con.start().then(main);
+
+        let editingMessageId = null;
+
+        function main() {
+            // Remove existing event handlers to avoid duplicates
+            $('#sendButton').off('click');
+            $('form').off('submit');
+            $(document).off('click', '.edit');
+            $(document).off('click', '.delete');
+            $('#image').off('click');
+            $('#file1').off('change');
+            $('#file').off('click');
+            $('#file2').off('change');
+            $('main').off('dragenter dragover');
+            $('main').off('dragleave drop');
+            $('main').off('drop');
+            $('#gallery').off('click');
+            $('#dialog').off('close');
+
+            // Form
+            $('#sendButton').click(() => {
+                const message = $('#messageInput').val().trim();
+                if (message === '') return;
+
+                if (editingMessageId) {
+                    con.invoke('EditMessage', editingMessageId, message);
+                    editingMessageId = null;
+                } else {
+                    const url = getImageURL(message);
+                    const id = getYouTubeId(message);
+
+                    if (url) {
+                        con.invoke('SendImage', name, url);
+                    } else if (id) {
+                        con.invoke('SendYouTube', name, id);
+                    } else {
+                        con.invoke('SendText', name, message);
+                    }
+                }
+                $('#messageInput').val('').focus();
+            });
+
+            // Image file picker
+            $('#image').click(e => {
+                console.log('Image button clicked');
+                $('#file1').click();
+            });
+
+            $('#file1').change(e => {
+                console.log('Image file selected');
+                const files = e.target.files;
+                sendImages(files);
+                e.target.value = null;
+            });
+
+            // File file picker
+            $('#file').click(e => {
+                console.log('File button clicked');
+                $('#file2').click();
+            });
+
+            $('#file2').change(e => {
+                console.log('File selected');
+                const files = e.target.files;
+                sendFiles(files);
+                playSound('messageSentSound'); // Play sound on message sent
+                e.target.value = null;
+            });
+
+            // Fullscreen
+            $(document).on('click', '.image', e => {
+                document.fullscreenElement ?
+                    document.exitFullscreen() :
+                    e.target.requestFullscreen();
+            });
+
+            // Edit message
+            $(document).on('click', '.edit', function() {
+                const $li = $(this).closest('li');
+                const messageId = $li.data('id');
+                const messageText = $li.find('.left-align').contents().filter(function() {
+                    return this.nodeType === Node.TEXT_NODE || this.tagName === 'BR';
+                }).map(function() {
+                    return this.nodeType === Node.TEXT_NODE ? this.nodeValue : '\n';
+                }).get().join('').trim();
+
+                $('#messageInput').val(messageText);
+                editingMessageId = messageId;
+            });
+
+            // Prevent form submission
+            $('form').submit((event) => {
+                event.preventDefault();
+                sendMessage();
+            });
+
+            // Send or edit message
+            $('#sendButton').click(() => {
+                sendMessage();
+            });
+
+            // Delete message
+            $(document).on('click', '.delete', function() {
+                const $li = $(this).closest('li');
+                const messageId = $li.data('id');
+
+                if (confirm('Are you sure you want to delete this message?')) {
+                    con.invoke('DeleteMessage', messageId, name);
+                }
+            });
+
+            // Drag and drop
+            $('main').on('dragenter dragover', e => {
+                e.preventDefault();
+                $('main').addClass('active');
+            });
+
+            $('main').on('dragleave drop', e => {
+                e.preventDefault();
+                $('main').removeClass('active');
+            });
+
+            $('main').on('drop', e => {
+                e.preventDefault();
+                const files = e.originalEvent.dataTransfer.files;
+                // TODO
+                for (const f of files) {
+                    if (f.type.startsWith('image/')) {
+                        sendImages([f]);
+                    }
+                    else {
+                        sendFiles([f]);
+                    }
+                }
+            });
+
+            // Image navigation logic
+            let currentIndex = -1;
+            const images = [];
+            const files = [];
+
+            // Open the gallery dialog
+            $('#gallery').click(e => {
+                const $images = $('.image').clone();
+                $('#container').html($images.length ? $images : 'No image');
+                $('#dialog')[0].showModal(); 
+            });
+
+            // Close the gallery dialog
+            $('#dialog').on('close', e => {
+                $('#container').empty(); //avoid duplicate in gallery
+            });
+
+            // Ensure the form submission closes the dialog
+            $('#dialog form').on('submit', function(e) {
+                e.preventDefault();
+                $('#dialog')[0].close();
+            });
+
+            // Open the file list dialog
+            $('#fileList').click(e => {
+                const $files = $('.file-item').clone();
+                $('#fileContainer').html($files.length ? $files : 'No files');
+                $('#fileDialog')[0].showModal();
+            });
+
+            // Close the file list dialog
+            $('#fileDialog').on('close', e => {
+                $('#fileContainer').empty(); //avoid duplicate in file list
+            });
+
+            // Ensure the form submission closes the dialog
+            $('#fileDialog form').on('submit', function(e) {
+                e.preventDefault();
+                $('#fileDialog')[0].close();
+            });
+
+            $('#container').on('click', '.image', function() {
+                currentIndex = $(this).index();
+                images.length = 0;
+                $('#container .image').each(function() {
+                    images.push($(this).attr('src'));
+                    $('#left, #right').show(); // Show navigation buttons after entering fullscreen
+                });
+
+                // Request fullscreen and handle it
+                $(this)[0].requestFullscreen().then(() => {
+                    $('#left, #right').show(); // Show navigation buttons after entering fullscreen
+                }).catch(err => {
+                    console.error("Failed to enter fullscreen:", err);
+                });
+            });
+
+            $('#left').click(() => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    const img = document.querySelector('.image:fullscreen');
+                    if (img) {
+                        img.src = images[currentIndex];
+                    }
+                }
+            });
+
+            $('#right').click(() => {
+                if (currentIndex < images.length - 1) {
+                    currentIndex++;
+                    const img = document.querySelector('.image:fullscreen');
+                    if (img) {
+                        img.src = images[currentIndex];
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('fileInput');
+            const video = document.getElementById('video');
+            const capturePhotoButton = document.getElementById('capturePhotoButton');
+            const capturedPhoto = document.getElementById('capturedPhoto');
+            const sendButton = document.getElementById('sendButton');
+
+            // Function to start webcam
+            function startWebcam() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                        video.srcObject = stream;
+                        video.style.display = 'block';
+                    }).catch(err => {
+                        console.error("Error accessing webcam: ", err);
+                    });
+                } else {
+                    console.error("getUserMedia not supported on your browser!");
+                }
+            }
+
+            // Handle webcam capture
+            capturePhotoButton.addEventListener('click', () => {
+                if (!video.srcObject) {
+                    startWebcam();
+                } else {
+                    capturePhoto();
+                }
+            });
+                
+            function capturePhoto() {           
+                if (video.srcObject) {
+                    const canvas = document.createElement('canvas');
+                    const scaleFactor = 0.8;
+                    canvas.width = video.videoWidth * scaleFactor;
+                    canvas.height = video.videoHeight * scaleFactor;
+                    const context = canvas.getContext('2d');
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/png');
+                    sessionStorage.setItem('avatar', dataUrl);
+                    console.log('Photo captured:', dataUrl); // Log the captured photo data URL
+
+                    // Display the captured photo
+                    capturedPhoto.src = dataUrl;
+                    capturedPhoto.style.display = 'block';
+
+                    // Stop the video stream and hide the video element
+                    const stream = video.srcObject;
+                    const tracks = stream.getTracks();
+                    tracks.forEach(track => track.stop());
+                    video.srcObject = null;
+                    video.style.display = 'none';
+
+                    // Convert data URL to File object and send the captured photo
+                    const file = dataURLtoFile(dataUrl, 'captured.png');
+                    // Send the captured photo
+                    sendImages([file]);
+                } else {
+                    console.error("No video stream available to capture photo.");
+                }
+            };
+
+            // Function to convert data URL to File object
+            function dataURLtoFile(dataUrl, filename) {
+                const arr = dataUrl.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new File([u8arr], filename, { type: mime });
+            }
+    
+            // Handle file input change
+            fileInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                sendImages(files);
+            });
+            
+        });
+
+     
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\chat.html",
+      "PackagePath": "staticwebassets\\chat.html"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\chatpriv.html",
+      "PackagePath": "staticwebassets\\chatpriv.html"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\css\\app.css",
+      "PackagePath": "staticwebassets\\css\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\emojis.json",
+      "PackagePath": "staticwebassets\\emojis.json"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\game.html",
+      "PackagePath": "staticwebassets\\game.html"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\gameIndex.html",
+      "PackagePath": "staticwebassets\\gameIndex.html"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\Sakura-Girl-Yay-chosic.com_.mp3",
+      "PackagePath": "staticwebassets\\image\\Sakura-Girl-Yay-chosic.com_.mp3"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\Shouts-And-Applauses-Of-Teens-chosic.com_.mp3",
+      "PackagePath": "staticwebassets\\image\\Shouts-And-Applauses-Of-Teens-chosic.com_.mp3"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\chatbubble.webp",
+      "PackagePath": "staticwebassets\\image\\chatbubble.webp"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\favicon.png",
+      "PackagePath": "staticwebassets\\image\\favicon.png"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\mixkit-explosion-in-battle-2809.wav",
+      "PackagePath": "staticwebassets\\image\\mixkit-explosion-in-battle-2809.wav"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\mixkit-game-ball-tap-2073.wav",
+      "PackagePath": "staticwebassets\\image\\mixkit-game-ball-tap-2073.wav"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\mixkit-paper-slide-1530.wav",
+      "PackagePath": "staticwebassets\\image\\mixkit-paper-slide-1530.wav"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\mixkit-player-losing-or-failing-2042.wav",
+      "PackagePath": "staticwebassets\\image\\mixkit-player-losing-or-failing-2042.wav"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\privc.webp",
+      "PackagePath": "staticwebassets\\image\\privc.webp"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\image\\settingButton.jpg",
+      "PackagePath": "staticwebassets\\image\\settingButton.jpg"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\js\\app.js",
+      "PackagePath": "staticwebassets\\js\\app.js"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\js\\ltmg.js",
+      "PackagePath": "staticwebassets\\js\\ltmg.js"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\js\\mg.js",
+      "PackagePath": "staticwebassets\\js\\mg.js"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\list.html",
+      "PackagePath": "staticwebassets\\list.html"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\minesweeper.html",
+      "PackagePath": "staticwebassets\\minesweeper.html"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\rudeWords.json",
+      "PackagePath": "staticwebassets\\rudeWords.json"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\sounds\\message-received.mp3",
+      "PackagePath": "staticwebassets\\sounds\\message-received.mp3"
+    },
+    {
+      "Id": "C:\\Users\\selin\\OneDrive\\desktop\\RIT\\Y2S3\\Emerging Web Technologies\\assignment1\\Really Last\\ChatRT\\wwwroot\\sounds\\message-sent.mp3",
+      "PackagePath": "staticwebassets\\sounds\\message-sent.mp3"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.ChatRT.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.ChatRT.props",
+      "PackagePath": "build\\ChatRT.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.ChatRT.props",
+      "PackagePath": "buildMultiTargeting\\ChatRT.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.ChatRT.props",
+      "PackagePath": "buildTransitive\\ChatRT.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

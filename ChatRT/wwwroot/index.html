@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+    <title>Chat</title>
+    <link href="image/favicon.png" rel="shortcut icon">
+    <link href="css/app.css" rel="stylesheet">
+    <style>
+        select, input, button {
+            font-size: 2em;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input, select, button {
+            margin: 10px 0;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            max-width: 400px;
+        }
+
+        #selectedImage, #video, #capturedPhoto {
+            display: none;
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            object-position: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Chat</h1>
+        <nav>
+            <ul>
+                <li><a href="gameIndex.html">Game</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <p>Select profile and enter name :</p>
+
+        <form autocomplete="off">
+            <select id="profile">
+                <option value="">Select Profile</option>
+                <option value="icon">😺 Icon</option>
+                <option value="gallery">🖼️ Gallery</option>
+                <option value="webcam">📸 Camera</option>
+            </select>
+
+            <select id="icon" style="display: none;">
+                <option>👦🏻</option>
+                <option>👧🏻</option>
+                <option>🐶</option>
+                <option>🐱</option>
+                <option>🐭</option>
+                <option>🐹</option>
+                <option>🐰</option>
+                <option>🦊</option>
+                <option>🐻</option>
+                <option>🐼</option>
+                <option>🐨</option>
+                <option>🐯</option>
+                <option>🦁</option>
+                <option>🐮</option>
+                <option>🐷</option>
+                <option>🐸</option>
+                <option>🐵</option>
+                <option>🐺</option>
+                <option>🐗</option>
+                <option>🦝</option>
+                <option>🐴</option>
+                <option>🦄</option>
+                <option>🦓</option>
+            </select>
+
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <img id="selectedImage" alt="Selected Image">
+            <!-- <button type="button" id="captureButton" style="display: none;">Capture from Webcam</button> -->
+            <video id="video" autoplay></video>
+            <img id="capturedPhoto" alt="Captured Photo" style="display:none;"/>
+            <button type="button" id="capturePhotoButton" style="display: none;">Capture Photo</button>
+
+            <input type="text" id="name" placeholder="Enter Name" autofocus>
+            <button>OK</button>
+        </form>
+
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.slim.js"></script>
+    <script>
+
+        // // Function to make local storage = []
+        // function clearLocalStorage() {
+        //     localStorage.clear();
+        //     console.log("Local storage cleared.");
+        // }
+
+        // // Call the function to clear local storage
+        // clearLocalStorage();
+
+        const el = $('#icon')[0];
+        el.selectedIndex = Math.floor(Math.random() * el.options.length);
+
+        // Function to generate a random username
+        function generateRandomUsername() {
+            const adjectives = ['Cool', 'Super', 'Fast', 'Smart', 'Brave'];
+            const nouns = ['Tiger', 'Eagle', 'Shark', 'Lion', 'Panther'];
+            const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const noun = nouns[Math.floor(Math.random() * nouns.length)];
+            const number = Math.floor(Math.random() * 1000);
+            return `${adjective}${noun}${number}`;
+        }
+
+        // Set a random username as the default value
+        $('#name').val(generateRandomUsername());
+
+        // Function to check if the username is duplicated
+        function isUsernameDuplicated(name) {
+            const existingUsernames = JSON.parse(localStorage.getItem('usernames')) || [];
+            console.log("Existing usernames:", existingUsernames);
+            return existingUsernames.includes(name);
+        }
+
+        // Function to save the username
+        function saveUsername(name) {
+            let existingUsernames = JSON.parse(localStorage.getItem('usernames')) || [];
+            existingUsernames.push(name);
+            localStorage.setItem('usernames', JSON.stringify(existingUsernames));
+            console.log("Updated usernames:", existingUsernames);
+        }
+
+        // Handle profile selection change
+        $('#profile').change(function() {
+            const selectedProfile = $(this).val();
+            $('#icon, #fileInput, #captureButton, #capturePhotoButton, #video').hide();
+            $('#selectedImage').attr('src', '').hide();
+            $('#capturedPhoto').attr('src', '').hide();
+
+            if (selectedProfile === 'icon') {
+                $('#icon').show();
+            } else if (selectedProfile === 'gallery') {
+                $('#fileInput').show();
+            } else if (selectedProfile === 'webcam') {
+                $('#captureButton, #video, #capturePhotoButton').show();
+                startWebcam();
+            }   
+        });
+
+        // Handle file input change
+        $('#fileInput').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#selectedImage').attr('src', e.target.result).show();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        $('form').submit(e => {
+            e.preventDefault();
+
+            const profile = $('#profile').val();
+            const icon = $('#icon').val().trim();
+            const name = $('#name').val().trim();
+            const fileInput = $('#fileInput')[0];
+            const video = $('#video')[0];
+
+            console.log("Submitted name:", name);
+            console.log("Selected profile:", profile);
+
+            if (name) {
+                if (isUsernameDuplicated(name)) {
+                    alert('The name is duplicated, cannot be used.');
+                    console.log("Name is duplicated:", name);
+                } else {
+                    saveUsername(name);
+                    sessionStorage.setItem('name', name);
+                    console.log("Name saved:", name);
+                
+                    if (profile === 'gallery' && fileInput.files.length > 0) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            sessionStorage.setItem('avatar', e.target.result);
+                            console.log("Avatar saved from gallery:", e.target.result);
+                            location.href = 'chat.html';
+                        };
+                        reader.readAsDataURL(fileInput.files[0]);
+                    } else if (profile === 'webcam' && video.srcObject) {
+                        console.log("Webcam profile selected and video stream available.");
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas.getContext('2d').drawImage(video, 0, 0);
+                        const avatarDataUrl = canvas.toDataURL();
+                        sessionStorage.setItem('avatar', avatarDataUrl);
+                        console.log("Avatar saved from webcam:", avatarDataUrl);
+                        location.href = 'chat.html';
+                    } else if (profile === 'icon') {
+                        sessionStorage.setItem('icon', icon);
+                        console.log("Icon saved:", icon);
+                        location.href = 'chat.html';
+                    } else {
+                        console.log("Profile value:", profile);
+                        console.log("Video srcObject:", video.srcObject);
+                        console.log("Webcam profile not selected or video stream not available.");
+                    }
+
+                    $('#name').val('').focus();
+                }
+            }
+        });
+
+        // Handle webcam capture
+        function startWebcam() {
+            const video = $('#video')[0];
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    console.log("Webcam stream started.");
+                }).catch(err => {
+                        console.error("Error accessing webcam: ", err);
+                    });
+            } else {
+                    console.error("getUserMedia not supported on your browser!");
+            }
+        }
+
+        $('#capturePhotoButton').click(() => {
+            const video = $('#video')[0];
+            if (video.srcObject) {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/png');
+                sessionStorage.setItem('avatar', dataUrl);
+                console.log('Photo captured:', dataUrl); // Log the captured photo data URL
+
+                // Display the captured photo
+                const capturedPhoto = $('#capturedPhoto')[0];
+                capturedPhoto.src = dataUrl;
+                capturedPhoto.style.display = 'block';
+
+                // Stop the video stream and hide the video element
+                const stream = video.srcObject;
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                // video.srcObject = null; // This line is not needed
+                video.style.display = 'none';
+            } else {
+                console.error("No video stream available to capture photo.");
+            }
+        });
+
+    </script>
+</body>
+</html>

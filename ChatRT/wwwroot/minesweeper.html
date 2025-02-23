@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+
+    <link href="image/favicon.png" rel="shortcut icon">
+    <link href="css/app.css" rel="stylesheet">
+    <title>Minesweeper</title>
+    <style>
+        /* Chat icon style */
+        #chat-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* Chatbox style */
+        #chatbox {
+            z-index: 1000;
+            display: none;
+        }
+
+        #mute-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 1002;
+        }
+
+        #leave {
+            position: absolute;
+            top: 70px;
+            left: 16px;
+            font-size: 18px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+        }
+
+        tr {
+            height: 30px; /* Height of each row */
+        }
+
+        td {
+            width: 30px; /* Width of each cell */
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            font-size: 1.5rem;
+            background-color: #eee;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="/">Minesweeper</a></h1>
+    </header>
+    <table id="grid" style="font-size: 20pt;"></table>
+
+    <main>
+        <p><button id="leave">Leave</button>
+
+        <img id="chat-icon" src="image/chatbubble.webp" alt="Chat" onclick="toggleChat()" />
+        
+        <div id="chatbox" class="chatbox">
+            <iframe src="chatpriv.html" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+    </main>
+        <!-- Background Music && Sound Effect-->
+        <audio id="background-music" loop>
+        <source src="image/Sakura-Girl-Yay-chosic.com_.mp3" type="audio/mpeg"> Your browser does not support the audio element. </audio>
+        <audio id="explosion-sound" src="image/mixkit-explosion-in-battle-2809.wav" preload="auto"></audio>
+        <audio id="flag-sound" src="image/mixkit-paper-slide-1530.wav" preload="auto"></audio>
+        <audio id="lose-sound" src="image/mixkit-player-losing-or-failing-2042.wav" type="audio/mpeg"></audio>
+
+    
+    <!-- Mute Button -->
+    <button id="mute-button" onclick="toggleMute()">Mute</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        // ========================================================================================
+        // General
+        // ========================================================================================
+        
+        const backgroundMusic = document.getElementById('background-music');
+        backgroundMusic.volume = 0.1; // Adjust volume
+        backgroundMusic.play().catch(error => console.error('Error playing music:', error));
+
+        const icon = sessionStorage.getItem('icon');
+        const name = sessionStorage.getItem('name');
+
+        if (!icon || !name) { 
+            location = '/';
+            throw 'ERROR: Invalid icon or name';
+        }
+
+        const gameId = new URL(location).searchParams.get('gameId');
+
+        if (!gameId) {
+            location = 'list.html';
+            throw 'ERROR: Invalid game id';
+        }
+
+        $('#leave').click(e => {
+            location = 'list.html';
+        });
+
+        // ========================================================================================
+        // Minesweeper Game
+        // ========================================================================================
+        class MGame {
+            #rows
+            #columns
+            #numOfMines
+            #gridMeta
+            #gameWon
+            #gameOver
+
+            constructor(height, width, numOfMines, gridId) {
+                this.#rows = height;
+                this.#columns = width;
+                this.#numOfMines = numOfMines;
+                this.#gridMeta = [];
+                this.#gameWon = false;   
+                this.#gameOver = false;
+
+                this.buildBoard(gridId);
+            }
+
+            buildBoard(gridId) {
+                const table = document.querySelector(gridId);
+                const cellsToBeMined = [];
+
+                for (let rowIndex = 0; rowIndex < this.#rows; rowIndex++) {
+                    const row = document.createElement('tr');
+                    table.appendChild(row);
+                    this.#gridMeta.push([]);
+                    for (let colIndex = 0; colIndex < this.#columns; colIndex++) {
+                        const cell = document.createElement('td');
+                        cell.innerText = '⬛';
+                        cell.dataset.number = 0;
+                        cell.dataset.bomb = false;
+                        cell.dataset.revealed = false;
+
+                        cell.addEventListener('contextMenu', event => event.preventDefault(), false);
+                        
+                        cell.addEventListener('mousedown', event => {
+                            if (event.button == 0 ){
+                                this.reveal(cell);
+                            } else if (event.button == 2) {
+                                this.flag(cell);
+                            }
+                        });
+
+                        cellsToBeMined.push({ rowIndex, colIndex, cell });
+                        this.#gridMeta[rowIndex].push(cell);
+
+                        row.appendChild(cell);
+                    }
+                } 
+
+                // Shuffle Array
+                cellsToBeMined.sort(() => 0.5 - Math.random()) // get shuffle on array
+                    .slice(0, this.#numOfMines)
+                    .forEach(cellData => {
+                        cellData.cell.dataset.bomb = true;
+                        this.safeIncr(cellData.rowIndex + 1, cellData.colIndex);
+                        this.safeIncr(cellData.rowIndex + 1, cellData.colIndex + 1);
+                        this.safeIncr(cellData.rowIndex + 1, cellData.colIndex - 1);
+
+                        this.safeIncr(cellData.rowIndex - 1, cellData.colIndex);
+                        this.safeIncr(cellData.rowIndex - 1, cellData.colIndex + 1);
+                        this.safeIncr(cellData.rowIndex - 1, cellData.colIndex - 1);
+                        this.safeIncr(cellData.rowIndex, cellData.colIndex + 1);
+                        this.safeIncr(cellData.rowIndex, cellData.colIndex - 1);
+                    });
+            }
+
+            safeIncr(row, col) {
+                if (row >= this.#rows || col >= this.#columns || row < 0 || col < 0) {
+                    return;
+                }
+                this.#gridMeta[row][col].dataset.number++;
+            }
+
+            revealAll() {
+                this.#gridMeta.forEach(row => row.forEach(cell => this.reveal(cell)));
+            }
+
+            reveal(cell) {
+                const nums = ["🟦", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣"];
+                if (cell.dataset.bomb == "true" && this.#gameWon) {
+                    cell.innerText = "💣";
+                } else if (cell.dataset.bomb == "true") {
+                    cell.innerText = "💥";
+                    this.#gameOver = true;
+                    playSound('explosion-sound');
+                    playSound('lose-sound');
+                    location = 'list.html';
+                    
+                } else {
+                    cell.innerText = nums[cell.dataset.number];
+                }
+                cell.dataset.revealed = "true";
+            }
+
+            flag(cell) {
+                if (cell.dataset.revealed == "true") {
+                    return;
+                }
+                cell.innerText = "🚩";
+                playSound('flag-sound');
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new MGame(10, 10, 20, '#grid');
+        });
+
+        function toggleChat() {
+            var chatbox = document.getElementById("chatbox");
+            if (chatbox.style.display == "none" || chatbox.style.display == "") {
+                chatbox.style.display = "block";
+            } else {
+                chatbox.style.display = "none";
+            }
+        }
+
+        function toggleMute() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+                document.getElementById("mute-button").innerText = "Mute";
+            } else {
+                backgroundMusic.pause();
+                document.getElementById("mute-button").innerText = "Unmute";
+            }
+        }
+
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.muted = false; // Ensure the sound is not muted
+                sound.volume = 1.0;  // Set the volume to maximum
+                sound.play().catch(error => {
+                    console.error('Error playing sound:', error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
